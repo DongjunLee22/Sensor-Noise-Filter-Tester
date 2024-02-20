@@ -1,9 +1,11 @@
 #include <SFML/Graphics.hpp>
 #include "OscopeCtrl.h"
-#include "MovingAverageFilter.h"
-#include "KalmanFilter.h"
-#include "PassFilters.h"
-#include "Filtering.h"
+#include "MovingAverageFilter.h"    // Moving Average filter 헤더
+#include "KalmanFilter.h"           // Kalman filter 헤더
+#include "PassFilters.h"            // 다양한 Pass filter 헤더
+#include "Filtering.h"              // Pass필터를 이용한 필터링 헤더
+#include "FilterAnalysis.h"         // 필터 성능 분석 기능 헤더
+#include "DataStorage.h"            // 데이터 저장 헤더
 
 #include <iostream>
 #include <cmath>
@@ -85,7 +87,7 @@ int main() {
 
 
     sf::RenderWindow window(sf::VideoMode(1500, 800), "Real-time Graph with Noise Filter");
-    window.setFramerateLimit(5000);
+    window.setFramerateLimit(5000);     // 그래프 화면 출력 프레임
 
     OscopeCtrl oscilloscope(1500, 800); // 그래프의 너비와 높이 설정
 
@@ -94,8 +96,7 @@ int main() {
     double t_duration_ns_double = 0.0;
     float t_stamp_ns_float = 0.0;
     
-    // 데이터 저장 컨테이너
-    std::vector<std::tuple<float, float, float>> dataStorage;
+    DataStorage storage;
 
     // 필터 관련 변수
     std::vector<sf::Vertex> rawPoints;  // 원본 데이터의 그래프를 위한 벡터
@@ -105,8 +106,7 @@ int main() {
     int filterWindowSize = 50;          // 이동 평균 필터의 윈도우 크기
     
     FilterType filtertype = None;       // 필터 타입
-
-    
+        
     MovingAverageFilter filter(filterWindowSize);   // 윈도우 사이즈만큼 moving average filter를 적용하는 함수
     
     std::vector<double> filterTaps;
@@ -157,6 +157,13 @@ int main() {
                 }
 
                 else if (event.key.code == sf::Keyboard::F) {
+                    storage.saveFilteredData("data_rec_Ccode_None.txt", storage.dataStorageNone);
+                    storage.saveFilteredData("data_rec_Ccode_MAF.txt", storage.dataStorageMovingAverage);
+                    storage.saveFilteredData("data_rec_Ccode_Lowpass.txt", storage.dataStorageLowPass);
+                    storage.saveFilteredData("data_rec_Ccode_Highpass.txt", storage.dataStorageHighPass);
+                    storage.saveFilteredData("data_rec_Ccode_Bandpass.txt", storage.dataStorageBandPass);
+                    storage.saveFilteredData("data_rec_Ccode_Kalman.txt", storage.dataStorageKalman);
+
                     window.close();                     // 프로그램 종료
                 }
 
@@ -222,18 +229,22 @@ int main() {
             switch (filtertype) {
             case None: {
                 filteredValue = 0;
+                storage.dataStorageNone.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));      // 센서 데이터 저장
                 break;
             }
             case MovingAverage: {
                 filteredValue = filter.apply(originalValue);
+                storage.dataStorageMovingAverage.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));
                 break;
             }
             case LowPass: {
                 filteredValue = 0;
+                storage.dataStorageLowPass.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));
                 break;
             }
             case HighPass: {
                 filteredValue = 0;
+                storage.dataStorageHighPass.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));
                 break;
             }
             case BandPass: {
@@ -241,12 +252,14 @@ int main() {
                 //std::vector<double> filteredSamples = filtering(singleSampleAsDouble, filterTaps);
 
                 filteredValue = 0;
+                storage.dataStorageBandPass.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));
                 break;
             }
             case Kalman: {
                 KalmanFilter kf(5.0, 10.0); // 초기 추정값과 오차 공분산 설정
                 kf.update(originalValue, 0.01, 0.1); // 측정값, 프로세스 노이즈, 측정 노이즈 업데이트
                 filteredValue = kf.x_esti;
+                storage.dataStorageKalman.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));
                 break;
             }
             default: {
@@ -255,20 +268,15 @@ int main() {
             }
             }
 
-            oscilloscope.addDataPoint(originalValue); // OscopeCtrl에 데이터 포인트 추가
+            oscilloscope.addDataPoint(originalValue);           // OscopeCtrl에 데이터 포인트 추가
             oscilloscope.addFilteredDataPoint(filteredValue);
             
-            // 센서 데이터 저장
-            dataStorage.push_back(make_tuple(t_stamp_ms_float, originalValue, filteredValue));
-
             time += 0.001;
         }
 
         window.clear();
         oscilloscope.draw(window); // OscopeCtrl을 사용하여 그래프 그리기
         window.display();
-
-
 
         //////////////////////////////////////////////////////////////////////////
         ////while문 속도 제어+++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -281,12 +289,7 @@ int main() {
             t_duration_ns_double = double(t_duration_ns.count());
         }
         //////////////////////////////////////////////////////////////////////////
-     
     }
-
-    // 데이터 저장
-    saveDataToFile("data_rec_Ccode.txt", dataStorage);
-
-
+        
     return 0;
 }

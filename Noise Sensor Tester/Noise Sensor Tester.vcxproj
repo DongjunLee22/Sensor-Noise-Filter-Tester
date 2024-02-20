@@ -141,7 +141,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\DataStorage.cpp" />
     <ClCompile Include="Src\EstimateFilterLen.cpp" />
+    <ClCompile Include="Src\FilterAnalysis.cpp" />
     <ClCompile Include="Src\Filtering.cpp" />
     <ClCompile Include="Src\KalmanFilter.cpp" />
     <ClCompile Include="Src\LowPassFilter.cpp" />
@@ -151,7 +153,9 @@
     <ClCompile Include="Tester_Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\DataStorage.h" />
     <ClInclude Include="Include\EstimateFilterLen.h" />
+    <ClInclude Include="Include\FilterAnalysis.h" />
     <ClInclude Include="Include\Filtering.h" />
     <ClInclude Include="Include\PassFilters.h" />
     <ClInclude Include="Include\KalmanFilter.h" />

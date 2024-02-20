@@ -148,6 +148,7 @@
     <ClCompile Include="Src\KalmanFilter.cpp" />
     <ClCompile Include="Src\LowPassFilter.cpp" />
     <ClCompile Include="Src\MovingAverageFilter.cpp" />
+    <ClCompile Include="Src\NoiseGenerator.cpp" />
     <ClCompile Include="Src\OscopeCtrl.cpp" />
     <ClCompile Include="Src\PassFilter.cpp" />
     <ClCompile Include="Tester_Main.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Include\EstimateFilterLen.h" />
     <ClInclude Include="Include\FilterAnalysis.h" />
     <ClInclude Include="Include\Filtering.h" />
+    <ClInclude Include="Include\NoiseGenerator.h" />
     <ClInclude Include="Include\PassFilters.h" />
     <ClInclude Include="Include\KalmanFilter.h" />
     <ClInclude Include="Include\LowPassFilter.hpp" />

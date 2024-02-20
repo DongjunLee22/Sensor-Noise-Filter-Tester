@@ -4,7 +4,7 @@
 #include <fstream>
 #include <iostream>
 
-void saveFilteredData(const std::string& filename, const std::vector<std::tuple<float, float, float>>& dataStorage) {
+void DataStorage::saveFilteredData(const std::string& filename, const std::vector<std::tuple<float, float, float>>& dataStorage) {
     if (dataStorage.size() > 100) {
         std::ofstream file(filename);
         if (!file.is_open()) {
@@ -16,4 +16,6 @@ void saveFilteredData(const std::string& filename, const std::vector<std::tuple<
             float time, original, filtered;
             std::tie(time, original, filtered) = entry;
             file << time << "\t" << original << "\t" << filtered << "\n";
-
+        }
+    }
+}

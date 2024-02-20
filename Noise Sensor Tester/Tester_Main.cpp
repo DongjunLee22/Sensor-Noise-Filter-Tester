@@ -6,6 +6,7 @@
 #include "Filtering.h"              // Pass필터를 이용한 필터링 헤더
 #include "FilterAnalysis.h"         // 필터 성능 분석 기능 헤더
 #include "DataStorage.h"            // 데이터 저장 헤더
+#include "NoiseGenerator.h"         // 다양한 노이즈 생성 헤더
 
 #include <iostream>
 #include <cmath>
@@ -29,6 +30,14 @@ enum FilterType {
     BandPass,
     Kalman
 };
+FilterType filtertype = None;       // 필터 타입
+
+enum NoiseType {
+    RandomNoise,
+    GaussianNoise,
+    SineWaveNoise
+};
+NoiseType noiseType = RandomNoise;  // 노이즈 타입
 
 // 센서 데이터 저장 함수
 void saveDataToFile(const std::string& filename, const std::vector<std::tuple<float, float, float>>& data) {
@@ -82,33 +91,29 @@ int main() {
     printf("4 : Apply the Band-Pass Filter\n\n");
     printf("5 : Apply the Kalman Filter\n\n");
 
+    printf("----------------------- Noise  setting -----------------------\n");
+    printf("Z : Random Noise\n");
+    printf("X : Gaussian Noise\n");
+    printf("C : SineWave Noise\n\n");
     printf("--------------------------------------------------------------\n");
 
 
-
+    // SFML 윈도우 설정 및 필요한 변수 초기화
     sf::RenderWindow window(sf::VideoMode(1500, 800), "Real-time Graph with Noise Filter");
+
     window.setFramerateLimit(5000);     // 그래프 화면 출력 프레임
-
     OscopeCtrl oscilloscope(1500, 800); // 그래프의 너비와 높이 설정
-
-    system_clock::time_point ts, t_start;
-    chrono::nanoseconds t_duration_ns, t_stamp_ns;
-    double t_duration_ns_double = 0.0;
-    float t_stamp_ns_float = 0.0;
     
     DataStorage storage;
 
     // 필터 관련 변수
     std::vector<sf::Vertex> rawPoints;  // 원본 데이터의 그래프를 위한 벡터
     std::vector<sf::Vertex> points;     // 필터링 된 데이터 그래프를 위한 벡터
-
     std::deque<float> filterSamples;    // 이동 평균 필터를 위한 샘플 저장
-    int filterWindowSize = 50;          // 이동 평균 필터의 윈도우 크기
-    
-    FilterType filtertype = None;       // 필터 타입
-        
+
+    int filterWindowSize = 50;          // 이동 평균 필터의 윈도우 크기   
     MovingAverageFilter filter(filterWindowSize);   // 윈도우 사이즈만큼 moving average filter를 적용하는 함수
-    
+
     std::vector<double> filterTaps;
     int N = 0;                                      // 필터 탭의 길이
     double fl = 0.1, fh = 0.3, fs = 1.0;            // Pass 필터의 파라미터
@@ -121,11 +126,17 @@ int main() {
     bool isCollecting = false;          // 데이터 수집 시작 여부
     bool filterEnabled = false;         // 필터링 활성화 여부  
 
+    // 노이즈 관련 변수
+    float noise = 0.0f;
     srand(static_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count())); // 노이즈 생성 초기화
 
+    // 시간 관련 변수
+    system_clock::time_point ts, t_start;
+    chrono::nanoseconds t_duration_ns, t_stamp_ns;
+    double t_duration_ns_double = 0.0;
+    float t_stamp_ns_float = 0.0;
     auto lastTimePoint = high_resolution_clock::now();  // 마지막 데이터 포인트 생성 시간
     double dataPointsPerSecond = 0.0;   // 초당 데이터 포인트 수
-
 
     while (window.isOpen())
     {
@@ -136,7 +147,8 @@ int main() {
             if (event.type == sf::Event::Closed)
                 window.close();
 
-            // Handle key input
+            // ------------------------------------------------------
+            // 프로그램 동작 설정
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::D) {
                     isCollecting = true;                // 센서 데이터 입력 시작
@@ -145,17 +157,6 @@ int main() {
                 else if (event.key.code == sf::Keyboard::A) {
                     isCollecting = false;               // 센서 데이터 입력 중지
                 }
-
-                else if (event.key.code == sf::Keyboard::W) {
-                    amplitude += 0.5;                   // 데이터 진폭 증가
-                }
-                else if (event.key.code == sf::Keyboard::S && amplitude > 0) {
-                    amplitude -= 0.5;                   // 데이터 진폭 감소
-                }
-                else if (event.key.code == sf::Keyboard::E) {
-                    amplitude = 0.0;
-                }
-
                 else if (event.key.code == sf::Keyboard::F) {
                     storage.saveFilteredData("data_rec_Ccode_None.txt", storage.dataStorageNone);
                     storage.saveFilteredData("data_rec_Ccode_MAF.txt", storage.dataStorageMovingAverage);
@@ -167,6 +168,17 @@ int main() {
                     window.close();                     // 프로그램 종료
                 }
 
+                // ------------------------------------------------------
+                // 센서 데이터 및 노이즈 크기 설정
+                else if (event.key.code == sf::Keyboard::W) {
+                    amplitude += 0.5;                   // 데이터 진폭 증가
+                }
+                else if (event.key.code == sf::Keyboard::S && amplitude > 0) {
+                    amplitude -= 0.5;                   // 데이터 진폭 감소
+                }
+                else if (event.key.code == sf::Keyboard::E) {
+                    amplitude = 0.0;
+                }               
                 else if (event.key.code == sf::Keyboard::I) {
                     noise_amplitude += 1.0f;            // 노이즈 증가
                 }
@@ -180,6 +192,8 @@ int main() {
                     noise_amplitude = 0.0f;             // 원본 데이터의 노이즈 강제 제거 (0으로 변환)
                 }
 
+                // ------------------------------------------------------
+                // 노이즈 필터 설정
                 if (event.key.code == sf::Keyboard::Num0) {
                     filtertype = None;  // 필터 적용 X
                 }
@@ -199,7 +213,19 @@ int main() {
                 }
                 else if (event.key.code == sf::Keyboard::Num5) {
                     filtertype = Kalman;    // Kalman Filter
-                }                  
+                }
+
+                // ------------------------------------------------------
+                // 센서 데이터 노이즈 타입 설정
+                if (event.key.code == sf::Keyboard::Z) {
+                    noiseType = RandomNoise;
+                }
+                else if (event.key.code == sf::Keyboard::X) {
+                    noiseType = GaussianNoise;
+                }
+                else if (event.key.code == sf::Keyboard::C) {
+                    noiseType = SineWaveNoise;
+                }
             }
         }
                
@@ -222,7 +248,18 @@ int main() {
             float t_stamp_ms_float = t_stamp_ns_float / 1000000.0;
 
             // 센서 신호
-            float noise = (static_cast<float>(rand()) / RAND_MAX * 2 - 1) * noise_amplitude;
+            
+            switch (noiseType) {
+            case RandomNoise:
+                noise = (static_cast<float>(rand()) / RAND_MAX * 2 - 1) * noise_amplitude;
+                break;
+            case GaussianNoise:
+                noise = NoiseGenerator::generateGaussianNoise(0.0f, noise_amplitude);
+                break;
+            case SineWaveNoise:
+                noise = NoiseGenerator::generateSineWaveNoise(noise_amplitude, 1.0f, time); // 예시로 1Hz의 주파수 사용
+                break;
+            }
             float originalValue = amplitude * std::sin(2 * M_PI * time) + noise;
             float filteredValue;
 

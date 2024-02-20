@@ -151,7 +151,7 @@
     <ClCompile Include="Src\NoiseGenerator.cpp" />
     <ClCompile Include="Src\OscopeCtrl.cpp" />
     <ClCompile Include="Src\PassFilter.cpp" />
-    <ClCompile Include="Tester_Main.cpp" />
+    <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\DataStorage.h" />

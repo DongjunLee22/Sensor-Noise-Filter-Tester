@@ -12,3 +12,4 @@
 int estimateFilterLen(double fl, double fh, double fs, double db);
 
 #endif // ESTIMATEFILTERLEN_H
+

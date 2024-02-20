@@ -9,3 +9,4 @@
 std::vector<float> filtering(const std::vector<float>& samples, const std::vector<float>& taps);
 
 #endif // FILTERING_H
+

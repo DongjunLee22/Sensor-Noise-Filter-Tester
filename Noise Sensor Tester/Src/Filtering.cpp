@@ -23,3 +23,4 @@ std::vector<double> filtering(const std::vector<double>& samples, const std::vec
 
     return std::vector<double>(out.begin() + N / 2, out.end());
 }
+

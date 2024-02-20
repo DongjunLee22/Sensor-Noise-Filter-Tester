@@ -26,3 +26,4 @@ private:
 };
 
 #endif // OSCOPECTRL_H
+

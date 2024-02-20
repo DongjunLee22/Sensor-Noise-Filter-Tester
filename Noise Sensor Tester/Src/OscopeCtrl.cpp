@@ -26,6 +26,7 @@ void OscopeCtrl::draw(sf::RenderWindow& window) {
     if (!filteredGraph.empty()) {
         window.draw(&filteredGraph[0], filteredGraph.size(), sf::LinesStrip, sf::BlendAlpha);
     }
+
 }
 
 void OscopeCtrl::updateGraph() {

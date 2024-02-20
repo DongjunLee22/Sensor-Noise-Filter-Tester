@@ -23,5 +23,6 @@ public:
     static std::vector<double> generateTaps(double fl, double fh, double fs, int N);
 };
 
+
 #endif // FILTERS_H
 

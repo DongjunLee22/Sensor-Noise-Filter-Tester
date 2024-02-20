@@ -254,7 +254,6 @@ int main() {
                 break;
             }
             }
-            
 
             oscilloscope.addDataPoint(originalValue); // OscopeCtrl에 데이터 포인트 추가
             oscilloscope.addFilteredDataPoint(filteredValue);

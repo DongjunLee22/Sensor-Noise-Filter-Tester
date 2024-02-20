@@ -11,3 +11,4 @@ void KalmanFilter::update(float z_meas, float Q, float R, float A, float H) {
 	x_esti = x_pred + K * (z_meas - H * x_pred);
 	P = P_pred - K * H * P_pred;
 }
+

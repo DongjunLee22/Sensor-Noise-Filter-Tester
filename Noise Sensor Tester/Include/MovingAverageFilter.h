@@ -17,3 +17,4 @@ private:
 };
 
 #endif // MOVINGAVERAGEFILTER_H
+

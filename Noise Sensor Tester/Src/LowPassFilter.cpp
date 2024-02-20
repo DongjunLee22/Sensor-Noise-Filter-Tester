@@ -15,6 +15,7 @@ LowPassFilter::LowPassFilter():
 	output(0),
 	ePow(0){}
 
+
 LowPassFilter::LowPassFilter(float iCutOffFrequency, float iDeltaTime):
 	output(0),
 	ePow(1-exp(-iDeltaTime * 2 * M_PI * iCutOffFrequency))

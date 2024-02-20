@@ -13,3 +13,4 @@ float MovingAverageFilter::apply(float newValue) {
     float sum = std::accumulate(samples.begin(), samples.end(), 0.0f);
     return sum / static_cast<float>(samples.size());
 }
+

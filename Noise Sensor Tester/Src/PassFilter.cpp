@@ -33,6 +33,7 @@ std::vector<double> HighPassFilter::generateTaps(double f, double fs, int N) {
         }
     }
     return taps;
+
 }
 
 std::vector<double> BandPassFilter::generateTaps(double fl, double fh, double fs, int N) {

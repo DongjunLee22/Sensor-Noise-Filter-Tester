@@ -21,3 +21,4 @@ private:
 };
 
 #endif //_LowPassFilter_hpp_
+

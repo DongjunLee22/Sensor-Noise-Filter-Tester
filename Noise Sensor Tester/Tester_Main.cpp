@@ -206,7 +206,7 @@ int main() {
             if (timeDiff > 0)
             {
                 dataPointsPerSecond = 1e6 / static_cast<double>(timeDiff); // 초당 데이터 포인트 수 계산 (1e6은 마이크로초를 초로 변환하는 계수)
-                std::cout << "Data Points Per Second: " << dataPointsPerSecond << std::endl; // 콘솔에 출력
+                std::cout << "Data Points Per Second: " << dataPointsPerSecond << " Hz" << std::endl; // 콘솔에 출력
             }
 
             // 시간 측정
